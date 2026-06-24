@@ -1,0 +1,25 @@
+.venv/
+__pycache__/
+*.pyc
+
+Frontend/ui/node_modules/
+Frontend/ui/dist/
+
+# 本地下载的句向量 / NER 权重（首次 run_server.bat 由 bootstrap_env.py 拉取）
+Backend/Models/embedding/
+Backend/Models/ner_cache/
+Backend/Models/ner/
+
+Data/Chroma_db/
+Data/Knowledge-Uploads/
+Data/Processed-Data/
+Data/Raw-Data/
+Data/knowledge_graph.sqlite3
+
+.env
+app.log
+*.log
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

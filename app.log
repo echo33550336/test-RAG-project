@@ -1,0 +1,1057 @@
+2026-04-24 17:40:01,368 - Backend.app.main - INFO - React 构建产物已挂载: E:\Campus-Qa-System\Frontend\ui\dist
+2026-04-24 17:40:02,087 - Backend.app.main - INFO - 数据库表初始化成功
+2026-04-24 17:40:02,154 - Backend.infrastructure.db - WARNING - SQL Server 结构补丁失败，请手动执行 Backend/infrastructure/sql/mssql_notice_scope.sql：(pyodbc.ProgrammingError) ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]索引'ix_email_verification_codes_purpose' 依赖于 列'purpose'。 (5074) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]由于一个或多个对象访问此 列，ALTER TABLE ALTER COLUMN purpose 失败。 (4922)")
+[SQL: 
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'class_name') IS NULL
+        ALTER TABLE dbo.users ADD class_name NVARCHAR(120) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_colleges') IS NULL
+        ALTER TABLE dbo.notices ADD scope_colleges NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_classes') IS NULL
+        ALTER TABLE dbo.notices ADD scope_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'teaching_classes') IS NULL
+        ALTER TABLE dbo.users ADD teaching_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.library_seat_bookings', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.library_seat_bookings (
+            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            user_id INT NOT NULL,
+            seat_code NVARCHAR(64) NOT NULL,
+            zone_name NVARCHAR(120) NOT NULL,
+            slot_label NVARCHAR(80) NOT NULL,
+            slot_start DATETIME2 NOT NULL,
+            slot_end DATETIME2 NOT NULL,
+            booking_date NVARCHAR(16) NOT NULL,
+            status NVARCHAR(32) NOT NULL CONSTRAINT DF_library_seat_bookings_status DEFAULT N'confirmed',
+            created_at DATETIME2 NOT NULL CONSTRAINT DF_library_seat_bookings_created DEFAULT SYSUTCDATETIME(),
+            cancelled_at DATETIME2 NULL
+        );
+        CREATE INDEX IX_library_seat_bookings_user_id ON dbo.library_seat_bookings(user_id);
+        CREATE INDEX IX_library_seat_bookings_date_status ON dbo.library_seat_bookings(booking_date, status);
+    END
+
+    IF OBJECT_ID('dbo.anonymous_word_stats_by_class', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.anonymous_word_stats_by_class (
+            day DATE NOT NULL,
+            class_key NVARCHAR(255) NOT NULL CONSTRAINT DF_anon_word_class DEFAULT N'unknown',
+            dimension NVARCHAR(32) NOT NULL,
+            keyword NVARCHAR(255) NOT NULL,
+            hit_count INT NOT NULL CONSTRAINT DF_anon_word_hit DEFAULT 0,
+            updated_at DATETIME2 NOT NULL CONSTRAINT DF_anon_word_updated DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT PK_anonymous_word_stats_by_class PRIMARY KEY (day, class_key, dimension, keyword)
+        );
+        CREATE INDEX IX_anon_word_day ON dbo.anonymous_word_stats_by_class(day);
+        CREATE INDEX IX_anon_word_class ON dbo.anonymous_word_stats_by_class(class_key);
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = N'dbo'
+          AND TABLE_NAME = N'email_verification_codes'
+          AND COLUMN_NAME = N'purpose'
+          AND CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          AND CHARACTER_MAXIMUM_LENGTH < 48
+    )
+        ALTER TABLE dbo.email_verification_codes ALTER COLUMN purpose NVARCHAR(48) NOT NULL;
+    ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-24 17:40:02,232 - Backend.infrastructure.db - INFO - 校园图谱表已就绪（storage=mysql_graph）
+2026-04-24 17:40:02,456 - Backend.app.main - INFO - 全局向量存储实例初始化成功
+2026-04-24 17:40:02,458 - Backend.app.main - INFO - 初始化时检测到文档数量: 0
+2026-04-24 17:40:03,016 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省智能体初始化成功
+2026-04-24 17:40:03,051 - Backend.rag.agents.wenyuan_ge_agent - INFO - 📚 文渊阁：初始化完成，开始管理个人私有知识库
+2026-04-24 17:40:03,054 - Backend.rag.RAG_primary - INFO - ✅ 使用外部传入的向量存储实例
+2026-04-24 17:40:03,054 - Backend.rag.RAG_primary - INFO - ✅ 向量存储初始化成功
+2026-04-24 17:40:03,055 - Backend.rag.RAG_primary - INFO - 🌐 嵌入模型远程下载通道: https://hf-mirror.com
+2026-04-24 17:40:03,056 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-small-zh-v1.5
+2026-04-24 17:40:18,927 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-04-24 17:40:18,928 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功（远程模型），使用模型: BAAI/bge-small-zh-v1.5
+2026-04-24 17:40:18,928 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功
+2026-04-24 17:40:18,928 - Backend.rag.RAG_primary - INFO - 正在初始化 LLM（混元）: hunyuan-2.0-instruct-20251111
+2026-04-24 17:40:18,928 - Backend.rag.RAG_primary - INFO - API 基础地址: https://tokenhub.tencentmaas.com/v1
+2026-04-24 17:40:19,283 - Backend.rag.RAG_primary - INFO - ✅ LLM 初始化成功（hunyuan-2.0-instruct-20251111），HTTP 超时: 360 秒，max_tokens: 1024，max_retries: 1
+2026-04-24 17:40:19,296 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：认证工具初始化成功
+2026-04-24 17:40:19,296 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：权限管理工具初始化成功
+2026-04-24 17:40:19,296 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：用户信息管理工具初始化成功
+2026-04-24 17:40:19,298 - Backend.services.tuition_service - INFO - ✅ 学费服务初始化成功
+2026-04-24 17:40:19,298 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：学费缴费工具初始化成功
+2026-04-24 17:40:19,300 - Backend.services.scholarship_service - INFO - ✅ 奖助学金服务初始化成功
+2026-04-24 17:40:19,300 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：奖助学金工具初始化成功
+2026-04-24 17:40:19,301 - Backend.services.financial_query_service - INFO - ✅ 财务查询服务初始化成功
+2026-04-24 17:40:19,301 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：财务查询工具初始化成功
+2026-04-24 17:40:19,303 - Backend.services.campus_card_service - INFO - ✅ 校园一卡通服务初始化成功
+2026-04-24 17:40:19,303 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：校园一卡通工具初始化成功
+2026-04-24 17:40:19,305 - Backend.services.maintenance_service - INFO - ✅ 后勤服务初始化成功
+2026-04-24 17:40:19,305 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：后勤服务工具初始化成功
+2026-04-24 17:40:19,307 - Backend.services.grade_service - INFO - ✅ 成绩服务初始化成功
+2026-04-24 17:40:19,307 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：成绩查询工具初始化成功
+2026-04-24 17:40:19,426 - Backend.services.schedule_service - INFO - ✅ 课表服务初始化成功
+2026-04-24 17:40:19,426 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：课表查询工具初始化成功
+2026-04-24 17:40:19,428 - Backend.services.exam_service - INFO - ✅ 考试服务初始化成功
+2026-04-24 17:40:19,428 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：考试安排工具初始化成功
+2026-04-24 17:40:19,430 - Backend.services.course_selection_service - INFO - ✅ 选课服务初始化成功
+2026-04-24 17:40:19,430 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：选课工具初始化成功
+2026-04-24 17:40:19,432 - Backend.services.activity_service - INFO - ✅ 校园活动服务初始化成功
+2026-04-24 17:40:19,432 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：校园活动工具初始化成功
+2026-04-24 17:40:19,433 - Backend.services.club_service - INFO - ✅ 社团服务初始化成功
+2026-04-24 17:40:19,433 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：社团管理工具初始化成功
+2026-04-24 17:40:19,435 - Backend.services.lost_and_found_service - INFO - ✅ 失物招领服务初始化成功
+2026-04-24 17:40:19,435 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：失物招领工具初始化成功
+2026-04-24 17:40:19,437 - Backend.services.life_service - INFO - ✅ 生活服务初始化成功
+2026-04-24 17:40:19,437 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：生活服务工具初始化成功
+2026-04-24 17:40:19,439 - Backend.services.security_service - INFO - ✅ 安全服务初始化成功
+2026-04-24 17:40:19,439 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：校园安全工具初始化成功
+2026-04-24 17:40:19,440 - Backend.services.mental_health_service - INFO - ✅ 心理健康服务初始化成功
+2026-04-24 17:40:19,440 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：心理健康工具初始化成功
+2026-04-24 17:40:19,442 - Backend.services.dispute_service - INFO - ✅ 纠纷调解服务初始化成功
+2026-04-24 17:40:19,442 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：纠纷调解工具初始化成功
+2026-04-24 17:40:19,442 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：图书馆座位预约工具初始化成功
+2026-04-24 17:40:19,444 - Backend.services.classroom_service - INFO - ✅ 教室预约服务初始化成功
+2026-04-24 17:40:19,444 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：教室预约工具初始化成功
+2026-04-24 17:40:19,445 - Backend.services.venue_service - INFO - ✅ 场馆预约服务初始化成功
+2026-04-24 17:40:19,445 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：场馆预约工具初始化成功
+2026-04-24 17:40:19,447 - Backend.services.lab_service - INFO - ✅ 实验室/设备预约服务初始化成功
+2026-04-24 17:40:19,447 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：实验室设备工具初始化成功
+2026-04-24 17:40:19,447 - Backend.rag.RAG_primary - INFO - ✅ 语言模型和智能体初始化成功
+2026-04-24 17:40:19,447 - Backend.rag.RAG_primary - INFO - ✅ RAG引擎初始化成功（使用三省六部多智能体架构）
+2026-04-24 17:40:19,447 - Backend.app.main - INFO - RAG 引擎初始化成功
+2026-04-24 17:40:19,448 - Backend.app.main - INFO - 宝贝鱼助手后端服务（FastAPI）启动完成
+2026-04-24 17:40:19,448 - Backend.app.main - INFO - 关系数据库 : DATABASE_URI
+2026-04-24 17:40:19,448 - Backend.app.main - INFO - 检索存储   : Chroma 向量库 + SQLite 知识图谱 (STORAGE_MODE=chroma)
+2026-04-24 17:40:19,448 - Backend.app.main - INFO - 图谱文件   : Data/knowledge_graph.sqlite3
+2026-04-24 17:40:19,448 - Backend.app.main - INFO - 服务地址   : http://127.0.0.1:5000
+2026-04-24 17:40:19,448 - Backend.app.main - INFO - 前端地址   : http://127.0.0.1:5000 （由 FastAPI 直接托管）
+2026-04-24 17:40:35,533 - Backend.infrastructure.auth - WARNING - Token已过期
+2026-04-24 17:40:35,533 - Backend.infrastructure.auth - WARNING - Token已过期
+2026-04-24 17:40:35,535 - Backend.infrastructure.auth - WARNING - Token已过期
+2026-04-24 17:40:35,535 - Backend.api.routes.auth - WARNING - Token验证失败，token前50字符: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxI
+2026-04-24 17:42:10,123 - Backend.app.main - INFO - React 构建产物已挂载: E:\Campus-Qa-System\Frontend\ui\dist
+2026-04-24 17:42:10,766 - Backend.app.main - INFO - 数据库表初始化成功
+2026-04-24 17:42:10,769 - Backend.infrastructure.db - WARNING - SQL Server 结构补丁失败，请手动执行 Backend/infrastructure/sql/mssql_notice_scope.sql：(pyodbc.ProgrammingError) ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]索引'ix_email_verification_codes_purpose' 依赖于 列'purpose'。 (5074) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]由于一个或多个对象访问此 列，ALTER TABLE ALTER COLUMN purpose 失败。 (4922)")
+[SQL: 
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'class_name') IS NULL
+        ALTER TABLE dbo.users ADD class_name NVARCHAR(120) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_colleges') IS NULL
+        ALTER TABLE dbo.notices ADD scope_colleges NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_classes') IS NULL
+        ALTER TABLE dbo.notices ADD scope_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'teaching_classes') IS NULL
+        ALTER TABLE dbo.users ADD teaching_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.library_seat_bookings', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.library_seat_bookings (
+            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            user_id INT NOT NULL,
+            seat_code NVARCHAR(64) NOT NULL,
+            zone_name NVARCHAR(120) NOT NULL,
+            slot_label NVARCHAR(80) NOT NULL,
+            slot_start DATETIME2 NOT NULL,
+            slot_end DATETIME2 NOT NULL,
+            booking_date NVARCHAR(16) NOT NULL,
+            status NVARCHAR(32) NOT NULL CONSTRAINT DF_library_seat_bookings_status DEFAULT N'confirmed',
+            created_at DATETIME2 NOT NULL CONSTRAINT DF_library_seat_bookings_created DEFAULT SYSUTCDATETIME(),
+            cancelled_at DATETIME2 NULL
+        );
+        CREATE INDEX IX_library_seat_bookings_user_id ON dbo.library_seat_bookings(user_id);
+        CREATE INDEX IX_library_seat_bookings_date_status ON dbo.library_seat_bookings(booking_date, status);
+    END
+
+    IF OBJECT_ID('dbo.anonymous_word_stats_by_class', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.anonymous_word_stats_by_class (
+            day DATE NOT NULL,
+            class_key NVARCHAR(255) NOT NULL CONSTRAINT DF_anon_word_class DEFAULT N'unknown',
+            dimension NVARCHAR(32) NOT NULL,
+            keyword NVARCHAR(255) NOT NULL,
+            hit_count INT NOT NULL CONSTRAINT DF_anon_word_hit DEFAULT 0,
+            updated_at DATETIME2 NOT NULL CONSTRAINT DF_anon_word_updated DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT PK_anonymous_word_stats_by_class PRIMARY KEY (day, class_key, dimension, keyword)
+        );
+        CREATE INDEX IX_anon_word_day ON dbo.anonymous_word_stats_by_class(day);
+        CREATE INDEX IX_anon_word_class ON dbo.anonymous_word_stats_by_class(class_key);
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = N'dbo'
+          AND TABLE_NAME = N'email_verification_codes'
+          AND COLUMN_NAME = N'purpose'
+          AND CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          AND CHARACTER_MAXIMUM_LENGTH < 48
+    )
+        ALTER TABLE dbo.email_verification_codes ALTER COLUMN purpose NVARCHAR(48) NOT NULL;
+    ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-24 17:42:10,774 - Backend.infrastructure.db - INFO - 校园图谱表已就绪（storage=mysql_graph）
+2026-04-24 17:42:10,903 - Backend.app.main - INFO - 全局向量存储实例初始化成功
+2026-04-24 17:42:10,911 - Backend.app.main - INFO - 初始化时检测到文档数量: 0
+2026-04-24 17:42:11,487 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省智能体初始化成功
+2026-04-24 17:42:11,490 - Backend.rag.agents.wenyuan_ge_agent - INFO - 📚 文渊阁：初始化完成，开始管理个人私有知识库
+2026-04-24 17:42:11,490 - Backend.rag.RAG_primary - INFO - ✅ 使用外部传入的向量存储实例
+2026-04-24 17:42:11,492 - Backend.rag.RAG_primary - INFO - ✅ 向量存储初始化成功
+2026-04-24 17:42:11,492 - Backend.rag.RAG_primary - INFO - 🌐 嵌入模型远程下载通道: https://hf-mirror.com
+2026-04-24 17:42:11,492 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-small-zh-v1.5
+2026-04-24 17:42:15,110 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-04-24 17:42:15,111 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功（远程模型），使用模型: BAAI/bge-small-zh-v1.5
+2026-04-24 17:42:15,111 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功
+2026-04-24 17:42:15,111 - Backend.rag.RAG_primary - INFO - 正在初始化 LLM（混元）: hunyuan-2.0-instruct-20251111
+2026-04-24 17:42:15,111 - Backend.rag.RAG_primary - INFO - API 基础地址: https://tokenhub.tencentmaas.com/v1
+2026-04-24 17:42:15,463 - Backend.rag.RAG_primary - INFO - ✅ LLM 初始化成功（hunyuan-2.0-instruct-20251111），HTTP 超时: 360 秒，max_tokens: 1024，max_retries: 1
+2026-04-24 17:42:15,470 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：认证工具初始化成功
+2026-04-24 17:42:15,470 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：权限管理工具初始化成功
+2026-04-24 17:42:15,470 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：用户信息管理工具初始化成功
+2026-04-24 17:42:15,470 - Backend.services.tuition_service - INFO - ✅ 学费服务初始化成功
+2026-04-24 17:42:15,470 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：学费缴费工具初始化成功
+2026-04-24 17:42:15,471 - Backend.services.scholarship_service - INFO - ✅ 奖助学金服务初始化成功
+2026-04-24 17:42:15,471 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：奖助学金工具初始化成功
+2026-04-24 17:42:15,471 - Backend.services.financial_query_service - INFO - ✅ 财务查询服务初始化成功
+2026-04-24 17:42:15,471 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：财务查询工具初始化成功
+2026-04-24 17:42:15,472 - Backend.services.campus_card_service - INFO - ✅ 校园一卡通服务初始化成功
+2026-04-24 17:42:15,472 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：校园一卡通工具初始化成功
+2026-04-24 17:42:15,473 - Backend.services.maintenance_service - INFO - ✅ 后勤服务初始化成功
+2026-04-24 17:42:15,473 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：后勤服务工具初始化成功
+2026-04-24 17:42:15,474 - Backend.services.grade_service - INFO - ✅ 成绩服务初始化成功
+2026-04-24 17:42:15,474 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：成绩查询工具初始化成功
+2026-04-24 17:42:15,474 - Backend.services.schedule_service - INFO - ✅ 课表服务初始化成功
+2026-04-24 17:42:15,474 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：课表查询工具初始化成功
+2026-04-24 17:42:15,475 - Backend.services.exam_service - INFO - ✅ 考试服务初始化成功
+2026-04-24 17:42:15,475 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：考试安排工具初始化成功
+2026-04-24 17:42:15,475 - Backend.services.course_selection_service - INFO - ✅ 选课服务初始化成功
+2026-04-24 17:42:15,476 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：选课工具初始化成功
+2026-04-24 17:42:15,476 - Backend.services.activity_service - INFO - ✅ 校园活动服务初始化成功
+2026-04-24 17:42:15,476 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：校园活动工具初始化成功
+2026-04-24 17:42:15,477 - Backend.services.club_service - INFO - ✅ 社团服务初始化成功
+2026-04-24 17:42:15,477 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：社团管理工具初始化成功
+2026-04-24 17:42:15,478 - Backend.services.lost_and_found_service - INFO - ✅ 失物招领服务初始化成功
+2026-04-24 17:42:15,478 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：失物招领工具初始化成功
+2026-04-24 17:42:15,478 - Backend.services.life_service - INFO - ✅ 生活服务初始化成功
+2026-04-24 17:42:15,478 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：生活服务工具初始化成功
+2026-04-24 17:42:15,479 - Backend.services.security_service - INFO - ✅ 安全服务初始化成功
+2026-04-24 17:42:15,479 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：校园安全工具初始化成功
+2026-04-24 17:42:15,480 - Backend.services.mental_health_service - INFO - ✅ 心理健康服务初始化成功
+2026-04-24 17:42:15,480 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：心理健康工具初始化成功
+2026-04-24 17:42:15,480 - Backend.services.dispute_service - INFO - ✅ 纠纷调解服务初始化成功
+2026-04-24 17:42:15,480 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：纠纷调解工具初始化成功
+2026-04-24 17:42:15,480 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：图书馆座位预约工具初始化成功
+2026-04-24 17:42:15,481 - Backend.services.classroom_service - INFO - ✅ 教室预约服务初始化成功
+2026-04-24 17:42:15,481 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：教室预约工具初始化成功
+2026-04-24 17:42:15,482 - Backend.services.venue_service - INFO - ✅ 场馆预约服务初始化成功
+2026-04-24 17:42:15,482 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：场馆预约工具初始化成功
+2026-04-24 17:42:15,483 - Backend.services.lab_service - INFO - ✅ 实验室/设备预约服务初始化成功
+2026-04-24 17:42:15,483 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：实验室设备工具初始化成功
+2026-04-24 17:42:15,483 - Backend.rag.RAG_primary - INFO - ✅ 语言模型和智能体初始化成功
+2026-04-24 17:42:15,483 - Backend.rag.RAG_primary - INFO - ✅ RAG引擎初始化成功（使用三省六部多智能体架构）
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - RAG 引擎初始化成功
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - 宝贝鱼助手后端服务（FastAPI）启动完成
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - 关系数据库 : DATABASE_URI
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - 检索存储   : Chroma 向量库 + SQLite 知识图谱 (STORAGE_MODE=chroma)
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - 图谱文件   : Data/knowledge_graph.sqlite3
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - 服务地址   : http://127.0.0.1:5000
+2026-04-24 17:42:15,483 - Backend.app.main - INFO - 前端地址   : http://127.0.0.1:5000 （由 FastAPI 直接托管）
+2026-04-24 17:43:01,435 - Backend.api.routes.admin - INFO - 文档元数据: total=0, sources=0, categories=0
+2026-04-24 17:43:20,709 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 17:43:20,709 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 17:43:20,710 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 17:43:20,710 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 17:43:20,710 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 17:43:22,552 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 17:43:22,556 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 17:43:22,556 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 17:43:22,557 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 17:43:22,557 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '通用', 'scene': '未知', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 17:43:22,557 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 7 字符
+2026-04-24 17:43:22,557 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 17:43:22,557 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 17:43:22,557 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 17:43:22,557 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 17:43:22,558 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '通用', 'scene': '未知', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '图书馆开放时间', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T17:43:22.557996'}
+2026-04-24 17:43:22,558 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 17:43:22,558 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 17:43:22,558 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 17:43:22,558 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T17:43:22.558415'}
+2026-04-24 17:43:22,558 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T17:43:22.558415'}
+2026-04-24 17:43:22,558 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 17:43:22,558 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 17:43:24,095 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 17:43:24,096 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 17:43:24,097 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 17:43:24,097 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 17:43:24,097 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 17:43:24,097 - Backend.rag.agents.validation_agent - INFO - ✅ 御史台：已跳过 LLM 校验（RAG_SKIP_LLM_VALIDATION）
+2026-04-24 17:43:24,097 - Backend.rag.RAG_primary - INFO - ℹ️ 已跳过门下省补充校验（RAG_SKIP_MINISTRY_RITES_VALIDATION）
+2026-04-24 17:43:24,097 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 17:43:24,098 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 17:43:24,098 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 17:43:24,098 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜未知】
+无法仅凭标题还原全文，建议通过学校官网、图书馆公告栏或校内信息平台查询具体开放时间安排。
+
+📅 回复时间：2026-04-24 17:43:...
+2026-04-24 17:43:25,097 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': '12', 'user_input': '图书馆开放时间', 'final_answer': '无法仅凭标题还原全文，建议通过学校官网、图书馆公告栏或校内信息平台查询具体开放时间安排。', 'intent': '其他', 'timestamp': '2026-04-24T17:43:25.097465', 'status': 'completed'}
+2026-04-24 17:44:39,671 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 17:44:39,671 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 17:44:51,224 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 17:44:51,224 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 17:44:51,224 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 17:44:51,224 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 17:44:51,224 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 17:44:53,602 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 17:44:53,603 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 17:44:53,603 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 17:44:53,603 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 17:44:53,604 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '校园通用', 'scene': '意图理解', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 7 字符
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 17:44:53,604 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '校园通用', 'scene': '意图理解', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '近期有哪些比赛', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T17:44:53.604589'}
+2026-04-24 17:44:53,604 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 17:44:53,604 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 17:44:53,604 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T17:44:53.604941'}
+2026-04-24 17:44:53,605 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T17:44:53.604941'}
+2026-04-24 17:44:53,605 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 17:44:53,605 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 17:44:56,596 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 17:44:56,596 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 17:44:56,597 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 17:44:56,597 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 17:44:56,597 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 17:44:56,598 - Backend.rag.agents.validation_agent - INFO - ✅ 御史台：已跳过 LLM 校验（RAG_SKIP_LLM_VALIDATION）
+2026-04-24 17:44:56,598 - Backend.rag.RAG_primary - INFO - ℹ️ 已跳过门下省补充校验（RAG_SKIP_MINISTRY_RITES_VALIDATION）
+2026-04-24 17:44:56,598 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 17:44:56,598 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 17:44:56,598 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 17:44:56,598 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜意图理解】
+无法仅凭“近期有哪些比赛”这一标题还原具体比赛信息。建议通过学校官网、教务处或学生会公告栏、校内信息平台检索最新赛事通知。
+
+📅 回复时...
+2026-04-24 17:44:57,597 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': '12', 'user_input': '近期有哪些比赛', 'final_answer': '无法仅凭“近期有哪些比赛”这一标题还原具体比赛信息。建议通过学校官网、教务处或学生会公告栏、校内信息平台检索最新赛事通知。', 'intent': '其他', 'timestamp': '2026-04-24T17:44:57.597848', 'status': 'completed'}
+2026-04-24 17:45:24,127 - Backend.api.routes.admin - INFO - 文档元数据: total=0, sources=0, categories=0
+2026-04-24 17:54:29,375 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 17:54:29,375 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 17:57:18,107 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 17:57:18,107 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 17:57:40,447 - Backend.app.main - INFO - React 构建产物已挂载: E:\Campus-Qa-System\Frontend\ui\dist
+2026-04-24 17:57:41,088 - Backend.app.main - INFO - 数据库表初始化成功
+2026-04-24 17:57:41,090 - Backend.infrastructure.db - WARNING - SQL Server 结构补丁失败，请手动执行 Backend/infrastructure/sql/mssql_notice_scope.sql：(pyodbc.ProgrammingError) ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]索引'ix_email_verification_codes_purpose' 依赖于 列'purpose'。 (5074) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]由于一个或多个对象访问此 列，ALTER TABLE ALTER COLUMN purpose 失败。 (4922)")
+[SQL: 
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'class_name') IS NULL
+        ALTER TABLE dbo.users ADD class_name NVARCHAR(120) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_colleges') IS NULL
+        ALTER TABLE dbo.notices ADD scope_colleges NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_classes') IS NULL
+        ALTER TABLE dbo.notices ADD scope_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'teaching_classes') IS NULL
+        ALTER TABLE dbo.users ADD teaching_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.library_seat_bookings', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.library_seat_bookings (
+            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            user_id INT NOT NULL,
+            seat_code NVARCHAR(64) NOT NULL,
+            zone_name NVARCHAR(120) NOT NULL,
+            slot_label NVARCHAR(80) NOT NULL,
+            slot_start DATETIME2 NOT NULL,
+            slot_end DATETIME2 NOT NULL,
+            booking_date NVARCHAR(16) NOT NULL,
+            status NVARCHAR(32) NOT NULL CONSTRAINT DF_library_seat_bookings_status DEFAULT N'confirmed',
+            created_at DATETIME2 NOT NULL CONSTRAINT DF_library_seat_bookings_created DEFAULT SYSUTCDATETIME(),
+            cancelled_at DATETIME2 NULL
+        );
+        CREATE INDEX IX_library_seat_bookings_user_id ON dbo.library_seat_bookings(user_id);
+        CREATE INDEX IX_library_seat_bookings_date_status ON dbo.library_seat_bookings(booking_date, status);
+    END
+
+    IF OBJECT_ID('dbo.anonymous_word_stats_by_class', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.anonymous_word_stats_by_class (
+            day DATE NOT NULL,
+            class_key NVARCHAR(255) NOT NULL CONSTRAINT DF_anon_word_class DEFAULT N'unknown',
+            dimension NVARCHAR(32) NOT NULL,
+            keyword NVARCHAR(255) NOT NULL,
+            hit_count INT NOT NULL CONSTRAINT DF_anon_word_hit DEFAULT 0,
+            updated_at DATETIME2 NOT NULL CONSTRAINT DF_anon_word_updated DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT PK_anonymous_word_stats_by_class PRIMARY KEY (day, class_key, dimension, keyword)
+        );
+        CREATE INDEX IX_anon_word_day ON dbo.anonymous_word_stats_by_class(day);
+        CREATE INDEX IX_anon_word_class ON dbo.anonymous_word_stats_by_class(class_key);
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = N'dbo'
+          AND TABLE_NAME = N'email_verification_codes'
+          AND COLUMN_NAME = N'purpose'
+          AND CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          AND CHARACTER_MAXIMUM_LENGTH < 48
+    )
+        ALTER TABLE dbo.email_verification_codes ALTER COLUMN purpose NVARCHAR(48) NOT NULL;
+    ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-24 17:57:41,104 - Backend.infrastructure.db - INFO - 校园图谱表已就绪（storage=mysql_graph）
+2026-04-24 17:57:41,236 - Backend.app.main - INFO - 全局向量存储实例初始化成功
+2026-04-24 17:57:41,244 - Backend.app.main - INFO - 初始化时检测到文档数量: 0
+2026-04-24 17:57:41,813 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省智能体初始化成功
+2026-04-24 17:57:41,816 - Backend.rag.agents.wenyuan_ge_agent - INFO - 📚 文渊阁：初始化完成，开始管理个人私有知识库
+2026-04-24 17:57:41,816 - Backend.rag.RAG_primary - INFO - ✅ 使用外部传入的向量存储实例
+2026-04-24 17:57:41,816 - Backend.rag.RAG_primary - INFO - ✅ 向量存储初始化成功
+2026-04-24 17:57:41,816 - Backend.rag.RAG_primary - INFO - 🌐 嵌入模型远程下载通道: https://hf-mirror.com
+2026-04-24 17:57:41,816 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-small-zh-v1.5
+2026-04-24 17:57:48,176 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-04-24 17:57:48,176 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功（远程模型），使用模型: BAAI/bge-small-zh-v1.5
+2026-04-24 17:57:48,177 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功
+2026-04-24 17:57:48,177 - Backend.rag.RAG_primary - INFO - 正在初始化 LLM（混元）: hunyuan-2.0-instruct-20251111
+2026-04-24 17:57:48,177 - Backend.rag.RAG_primary - INFO - API 基础地址: https://tokenhub.tencentmaas.com/v1
+2026-04-24 17:57:48,533 - Backend.rag.RAG_primary - INFO - ✅ LLM 初始化成功（hunyuan-2.0-instruct-20251111），HTTP 超时: 360 秒，max_tokens: 1024，max_retries: 1
+2026-04-24 17:57:48,538 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：认证工具初始化成功
+2026-04-24 17:57:48,538 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：权限管理工具初始化成功
+2026-04-24 17:57:48,539 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：用户信息管理工具初始化成功
+2026-04-24 17:57:48,539 - Backend.services.tuition_service - INFO - ✅ 学费服务初始化成功
+2026-04-24 17:57:48,539 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：学费缴费工具初始化成功
+2026-04-24 17:57:48,540 - Backend.services.scholarship_service - INFO - ✅ 奖助学金服务初始化成功
+2026-04-24 17:57:48,540 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：奖助学金工具初始化成功
+2026-04-24 17:57:48,540 - Backend.services.financial_query_service - INFO - ✅ 财务查询服务初始化成功
+2026-04-24 17:57:48,541 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：财务查询工具初始化成功
+2026-04-24 17:57:48,541 - Backend.services.campus_card_service - INFO - ✅ 校园一卡通服务初始化成功
+2026-04-24 17:57:48,541 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：校园一卡通工具初始化成功
+2026-04-24 17:57:48,542 - Backend.services.maintenance_service - INFO - ✅ 后勤服务初始化成功
+2026-04-24 17:57:48,542 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：后勤服务工具初始化成功
+2026-04-24 17:57:48,542 - Backend.services.grade_service - INFO - ✅ 成绩服务初始化成功
+2026-04-24 17:57:48,542 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：成绩查询工具初始化成功
+2026-04-24 17:57:48,543 - Backend.services.schedule_service - INFO - ✅ 课表服务初始化成功
+2026-04-24 17:57:48,543 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：课表查询工具初始化成功
+2026-04-24 17:57:48,543 - Backend.services.exam_service - INFO - ✅ 考试服务初始化成功
+2026-04-24 17:57:48,543 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：考试安排工具初始化成功
+2026-04-24 17:57:48,544 - Backend.services.course_selection_service - INFO - ✅ 选课服务初始化成功
+2026-04-24 17:57:48,544 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：选课工具初始化成功
+2026-04-24 17:57:48,545 - Backend.services.activity_service - INFO - ✅ 校园活动服务初始化成功
+2026-04-24 17:57:48,545 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：校园活动工具初始化成功
+2026-04-24 17:57:48,545 - Backend.services.club_service - INFO - ✅ 社团服务初始化成功
+2026-04-24 17:57:48,545 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：社团管理工具初始化成功
+2026-04-24 17:57:48,546 - Backend.services.lost_and_found_service - INFO - ✅ 失物招领服务初始化成功
+2026-04-24 17:57:48,546 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：失物招领工具初始化成功
+2026-04-24 17:57:48,546 - Backend.services.life_service - INFO - ✅ 生活服务初始化成功
+2026-04-24 17:57:48,547 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：生活服务工具初始化成功
+2026-04-24 17:57:48,547 - Backend.services.security_service - INFO - ✅ 安全服务初始化成功
+2026-04-24 17:57:48,547 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：校园安全工具初始化成功
+2026-04-24 17:57:48,548 - Backend.services.mental_health_service - INFO - ✅ 心理健康服务初始化成功
+2026-04-24 17:57:48,548 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：心理健康工具初始化成功
+2026-04-24 17:57:48,548 - Backend.services.dispute_service - INFO - ✅ 纠纷调解服务初始化成功
+2026-04-24 17:57:48,549 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：纠纷调解工具初始化成功
+2026-04-24 17:57:48,549 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：图书馆座位预约工具初始化成功
+2026-04-24 17:57:48,553 - Backend.services.classroom_service - INFO - ✅ 教室预约服务初始化成功
+2026-04-24 17:57:48,553 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：教室预约工具初始化成功
+2026-04-24 17:57:48,554 - Backend.services.venue_service - INFO - ✅ 场馆预约服务初始化成功
+2026-04-24 17:57:48,554 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：场馆预约工具初始化成功
+2026-04-24 17:57:48,555 - Backend.services.lab_service - INFO - ✅ 实验室/设备预约服务初始化成功
+2026-04-24 17:57:48,555 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：实验室设备工具初始化成功
+2026-04-24 17:57:48,555 - Backend.rag.RAG_primary - INFO - ✅ 语言模型和智能体初始化成功
+2026-04-24 17:57:48,555 - Backend.rag.RAG_primary - INFO - ✅ RAG引擎初始化成功（使用三省六部多智能体架构）
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - RAG 引擎初始化成功
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - 宝贝鱼助手后端服务（FastAPI）启动完成
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - 关系数据库 : DATABASE_URI
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - 检索存储   : Chroma 向量库 + SQLite 知识图谱 (STORAGE_MODE=chroma)
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - 图谱文件   : Data/knowledge_graph.sqlite3
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - 服务地址   : http://127.0.0.1:5000
+2026-04-24 17:57:48,555 - Backend.app.main - INFO - 前端地址   : http://127.0.0.1:5000 （由 FastAPI 直接托管）
+2026-04-24 17:59:08,560 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 17:59:08,560 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 17:59:08,561 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 17:59:08,561 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 17:59:08,561 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 17:59:11,545 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 17:59:11,550 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 17:59:11,550 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 17:59:11,550 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 17:59:11,550 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '校园服务', 'scene': '通用问答', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 17:59:11,550 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 7 字符
+2026-04-24 17:59:11,550 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 17:59:11,550 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 17:59:11,550 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 17:59:11,551 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 17:59:11,551 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '校园服务', 'scene': '通用问答', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '图书馆开放时间', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T17:59:11.551163'}
+2026-04-24 17:59:11,551 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 17:59:11,551 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 17:59:11,551 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 17:59:11,551 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T17:59:11.551637'}
+2026-04-24 17:59:11,551 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T17:59:11.551637'}
+2026-04-24 17:59:11,551 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 17:59:11,552 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 17:59:13,662 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 17:59:13,663 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 17:59:13,663 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 17:59:13,663 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 17:59:13,664 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 17:59:13,664 - Backend.rag.agents.validation_agent - INFO - ✅ 御史台：已跳过 LLM 校验（RAG_SKIP_LLM_VALIDATION）
+2026-04-24 17:59:13,664 - Backend.rag.RAG_primary - INFO - ℹ️ 已跳过门下省补充校验（RAG_SKIP_MINISTRY_RITES_VALIDATION）
+2026-04-24 17:59:13,664 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 17:59:13,664 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 17:59:13,664 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 17:59:13,665 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜通用问答】
+无法仅凭标题还原全文，建议通过学校官网图书馆栏目或校内公告系统查询具体开放时间安排，也可直接咨询图书馆前台获取最新信息。
+
+📅 回复时间...
+2026-04-24 17:59:14,664 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': '12', 'user_input': '图书馆开放时间', 'final_answer': '无法仅凭标题还原全文，建议通过学校官网图书馆栏目或校内公告系统查询具体开放时间安排，也可直接咨询图书馆前台获取最新信息。', 'intent': '其他', 'timestamp': '2026-04-24T17:59:14.664136', 'status': 'completed'}
+2026-04-24 18:04:56,781 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 18:04:56,781 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 18:04:56,782 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 18:04:56,782 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 18:04:56,782 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 18:05:00,489 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:05:00,490 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 18:05:00,490 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 18:05:00,490 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 18:05:00,491 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '校园服务', 'scene': '通用问答', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 18:05:00,491 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 7 字符
+2026-04-24 18:05:00,491 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 18:05:00,491 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 18:05:00,491 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 18:05:00,491 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 18:05:00,491 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '校园服务', 'scene': '通用问答', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '???????', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T18:05:00.491636'}
+2026-04-24 18:05:00,491 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 18:05:00,491 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 18:05:00,491 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 18:05:00,492 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': 'anonymous', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:05:00.492024'}
+2026-04-24 18:05:00,492 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': 'anonymous', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:05:00.492024'}
+2026-04-24 18:05:00,492 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 18:05:00,493 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 18:05:01,881 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:05:01,881 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 18:05:01,882 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 18:05:01,882 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 18:05:01,882 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 18:05:01,882 - Backend.rag.RAG_primary - ERROR - ❌ 答案未通过校验: 问题不合法，请使用自然语言描述需求
+2026-04-24 18:05:01,883 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：开始进行故障自愈与意图重写...
+2026-04-24 18:05:01,883 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：通用错误，进行意图重写
+2026-04-24 18:05:01,883 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 18:05:01,883 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 18:05:01,883 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 18:05:01,884 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜通用问答】
+系统暂时无法直接回答，原因：问题不合法，请使用自然语言描述需求
+系统在处理您的问题时遇到困难：问题不合法，请使用自然语言描述需求。建议改...
+2026-04-24 18:05:01,942 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 18:05:01,943 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 18:05:01,943 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 18:05:01,943 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 18:05:01,943 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 18:05:02,882 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': 'anonymous', 'user_input': '???????', 'final_answer': '无法理解该内容，请明确具体问题或需求。', 'intent': '其他', 'timestamp': '2026-04-24T18:05:02.882864', 'status': 'completed'}
+2026-04-24 18:05:04,154 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:05:04,154 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 18:05:04,155 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 18:05:04,155 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 18:05:04,155 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '通用', 'scene': '未知', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 18:05:04,195 - Backend.rag.RAG_primary - INFO - 🔍 查询向量类型: <class 'numpy.ndarray'>
+2026-04-24 18:05:04,196 - Backend.rag.RAG_primary - INFO - ✅ 查询向量生成成功，维度: 512
+2026-04-24 18:05:04,196 - Backend.rag.RAG_primary - INFO - 开始执行向量搜索，k=2
+2026-04-24 18:05:04,200 - Backend.rag.RAG_primary - INFO - ✅ 向量搜索成功，找到0条校园相关内容
+2026-04-24 18:05:04,201 - Backend.rag.RAG_primary - INFO - 🔍 中书省（Chroma+图谱）：上下文长度 10 字符
+2026-04-24 18:05:04,201 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 10 字符
+2026-04-24 18:05:04,202 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 18:05:04,202 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 18:05:04,202 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 18:05:04,202 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 18:05:04,202 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '通用', 'scene': '未知', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '?????????', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T18:05:04.202875'}
+2026-04-24 18:05:04,203 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 18:05:04,204 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 18:05:04,204 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 18:05:04,204 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': 'anonymous', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:05:04.204691'}
+2026-04-24 18:05:04,204 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': 'anonymous', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:05:04.204691'}
+2026-04-24 18:05:04,205 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 18:05:04,205 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 18:05:07,345 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:05:07,347 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 18:05:07,347 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 18:05:07,347 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 18:05:07,348 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 18:05:07,348 - Backend.rag.RAG_primary - ERROR - ❌ 答案未通过校验: 问题不合法，请使用自然语言描述需求
+2026-04-24 18:05:07,348 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：开始进行故障自愈与意图重写...
+2026-04-24 18:05:07,348 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：通用错误，进行意图重写
+2026-04-24 18:05:07,348 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 18:05:07,348 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 18:05:07,348 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 18:05:07,349 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜未知】
+系统暂时无法直接回答，原因：问题不合法，请使用自然语言描述需求
+系统在处理您的问题时遇到困难：问题不合法，请使用自然语言描述需求。建议改写为...
+2026-04-24 18:05:07,365 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 18:05:07,365 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 18:05:07,409 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 18:05:07,409 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 18:05:07,409 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 18:05:07,410 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 18:05:07,410 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 18:05:08,348 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': 'anonymous', 'user_input': '?????????', 'final_answer': '您的问题目前没有在校园知识库中找到相关内容，因此无法为您解答。  \n\n建议您：  \n1. 检查问题是否涉及校园学习、生活、制度等方面，并尝试用更明确的关键词重新提问。  \n2. 可先浏览学校官网或咨询教务处、学生处等官方渠道获取所需信息。', 'intent': '其他', 'timestamp': '2026-04-24T18:05:08.348525', 'status': 'completed'}
+2026-04-24 18:05:09,030 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:05:09,031 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 18:05:09,031 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 18:05:09,031 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 18:05:09,031 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '校园服务', 'scene': '通用问答', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 18:05:09,033 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 7 字符
+2026-04-24 18:05:09,034 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 18:05:09,034 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 18:05:09,034 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 18:05:09,034 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 18:05:09,034 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '校园服务', 'scene': '通用问答', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '????', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T18:05:09.034599'}
+2026-04-24 18:05:09,034 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 18:05:09,034 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 18:05:09,034 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 18:05:09,034 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': 'anonymous', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:05:09.034897'}
+2026-04-24 18:05:09,034 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': 'anonymous', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:05:09.034897'}
+2026-04-24 18:05:09,035 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 18:05:09,035 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 18:05:10,255 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:05:10,256 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 18:05:10,256 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 18:05:10,256 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 18:05:10,257 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 18:05:10,257 - Backend.rag.RAG_primary - ERROR - ❌ 答案未通过校验: 问题不合法，请使用自然语言描述需求
+2026-04-24 18:05:10,257 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：开始进行故障自愈与意图重写...
+2026-04-24 18:05:10,257 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：用户输入过于模糊，进行意图引导
+2026-04-24 18:05:10,257 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 18:05:10,257 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 18:05:10,257 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 18:05:10,258 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜通用问答】
+系统暂时无法直接回答，原因：问题不合法，请使用自然语言描述需求
+您的问题表述不够清晰。您可以这样提问：????，请给出具体步骤和可执行建...
+2026-04-24 18:05:11,257 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': 'anonymous', 'user_input': '????', 'final_answer': '无法理解您的问题，请明确提问内容。', 'intent': '其他', 'timestamp': '2026-04-24T18:05:11.257526', 'status': 'completed'}
+2026-04-24 18:06:13,786 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 18:06:13,787 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 18:06:13,809 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 18:06:13,809 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 18:06:13,823 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，从缓存返回答案
+2026-04-24 18:06:13,824 - Backend.rag.RAG_primary - INFO - ⚠️ 检测到重复问题，返回历史答案
+2026-04-24 18:09:50,641 - Backend.app.main - INFO - React 构建产物已挂载: E:\Campus-Qa-System\Frontend\ui\dist
+2026-04-24 18:09:51,288 - Backend.app.main - INFO - 数据库表初始化成功
+2026-04-24 18:09:51,291 - Backend.infrastructure.db - WARNING - SQL Server 结构补丁失败，请手动执行 Backend/infrastructure/sql/mssql_notice_scope.sql：(pyodbc.ProgrammingError) ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]索引'ix_email_verification_codes_purpose' 依赖于 列'purpose'。 (5074) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]由于一个或多个对象访问此 列，ALTER TABLE ALTER COLUMN purpose 失败。 (4922)")
+[SQL: 
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'class_name') IS NULL
+        ALTER TABLE dbo.users ADD class_name NVARCHAR(120) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_colleges') IS NULL
+        ALTER TABLE dbo.notices ADD scope_colleges NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_classes') IS NULL
+        ALTER TABLE dbo.notices ADD scope_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'teaching_classes') IS NULL
+        ALTER TABLE dbo.users ADD teaching_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.library_seat_bookings', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.library_seat_bookings (
+            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            user_id INT NOT NULL,
+            seat_code NVARCHAR(64) NOT NULL,
+            zone_name NVARCHAR(120) NOT NULL,
+            slot_label NVARCHAR(80) NOT NULL,
+            slot_start DATETIME2 NOT NULL,
+            slot_end DATETIME2 NOT NULL,
+            booking_date NVARCHAR(16) NOT NULL,
+            status NVARCHAR(32) NOT NULL CONSTRAINT DF_library_seat_bookings_status DEFAULT N'confirmed',
+            created_at DATETIME2 NOT NULL CONSTRAINT DF_library_seat_bookings_created DEFAULT SYSUTCDATETIME(),
+            cancelled_at DATETIME2 NULL
+        );
+        CREATE INDEX IX_library_seat_bookings_user_id ON dbo.library_seat_bookings(user_id);
+        CREATE INDEX IX_library_seat_bookings_date_status ON dbo.library_seat_bookings(booking_date, status);
+    END
+
+    IF OBJECT_ID('dbo.anonymous_word_stats_by_class', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.anonymous_word_stats_by_class (
+            day DATE NOT NULL,
+            class_key NVARCHAR(255) NOT NULL CONSTRAINT DF_anon_word_class DEFAULT N'unknown',
+            dimension NVARCHAR(32) NOT NULL,
+            keyword NVARCHAR(255) NOT NULL,
+            hit_count INT NOT NULL CONSTRAINT DF_anon_word_hit DEFAULT 0,
+            updated_at DATETIME2 NOT NULL CONSTRAINT DF_anon_word_updated DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT PK_anonymous_word_stats_by_class PRIMARY KEY (day, class_key, dimension, keyword)
+        );
+        CREATE INDEX IX_anon_word_day ON dbo.anonymous_word_stats_by_class(day);
+        CREATE INDEX IX_anon_word_class ON dbo.anonymous_word_stats_by_class(class_key);
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = N'dbo'
+          AND TABLE_NAME = N'email_verification_codes'
+          AND COLUMN_NAME = N'purpose'
+          AND CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          AND CHARACTER_MAXIMUM_LENGTH < 48
+    )
+        ALTER TABLE dbo.email_verification_codes ALTER COLUMN purpose NVARCHAR(48) NOT NULL;
+    ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-24 18:09:51,294 - Backend.infrastructure.db - INFO - 校园图谱表已就绪（storage=mysql_graph）
+2026-04-24 18:09:51,425 - Backend.app.main - INFO - 全局向量存储实例初始化成功
+2026-04-24 18:09:51,436 - Backend.app.main - INFO - 初始化时检测到文档数量: 0
+2026-04-24 18:09:52,000 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省智能体初始化成功
+2026-04-24 18:09:52,005 - Backend.rag.agents.wenyuan_ge_agent - INFO - 📚 文渊阁：初始化完成，开始管理个人私有知识库
+2026-04-24 18:09:52,006 - Backend.rag.RAG_primary - INFO - ✅ 使用外部传入的向量存储实例
+2026-04-24 18:09:52,006 - Backend.rag.RAG_primary - INFO - ✅ 向量存储初始化成功
+2026-04-24 18:09:52,007 - Backend.rag.RAG_primary - INFO - 🌐 嵌入模型远程下载通道: https://hf-mirror.com
+2026-04-24 18:09:52,007 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-small-zh-v1.5
+2026-04-24 18:09:57,385 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-04-24 18:09:57,386 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功（远程模型），使用模型: BAAI/bge-small-zh-v1.5
+2026-04-24 18:09:57,386 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功
+2026-04-24 18:09:57,386 - Backend.rag.RAG_primary - INFO - 正在初始化 LLM（混元）: hunyuan-2.0-instruct-20251111
+2026-04-24 18:09:57,386 - Backend.rag.RAG_primary - INFO - API 基础地址: https://tokenhub.tencentmaas.com/v1
+2026-04-24 18:09:57,750 - Backend.rag.RAG_primary - INFO - ✅ LLM 初始化成功（hunyuan-2.0-instruct-20251111），HTTP 超时: 360 秒，max_tokens: 1024，max_retries: 1
+2026-04-24 18:09:57,755 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：认证工具初始化成功
+2026-04-24 18:09:57,755 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：权限管理工具初始化成功
+2026-04-24 18:09:57,755 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：用户信息管理工具初始化成功
+2026-04-24 18:09:57,756 - Backend.services.tuition_service - INFO - ✅ 学费服务初始化成功
+2026-04-24 18:09:57,756 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：学费缴费工具初始化成功
+2026-04-24 18:09:57,756 - Backend.services.scholarship_service - INFO - ✅ 奖助学金服务初始化成功
+2026-04-24 18:09:57,757 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：奖助学金工具初始化成功
+2026-04-24 18:09:57,757 - Backend.services.financial_query_service - INFO - ✅ 财务查询服务初始化成功
+2026-04-24 18:09:57,757 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：财务查询工具初始化成功
+2026-04-24 18:09:57,758 - Backend.services.campus_card_service - INFO - ✅ 校园一卡通服务初始化成功
+2026-04-24 18:09:57,758 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：校园一卡通工具初始化成功
+2026-04-24 18:09:57,759 - Backend.services.maintenance_service - INFO - ✅ 后勤服务初始化成功
+2026-04-24 18:09:57,759 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：后勤服务工具初始化成功
+2026-04-24 18:09:57,759 - Backend.services.grade_service - INFO - ✅ 成绩服务初始化成功
+2026-04-24 18:09:57,759 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：成绩查询工具初始化成功
+2026-04-24 18:09:57,760 - Backend.services.schedule_service - INFO - ✅ 课表服务初始化成功
+2026-04-24 18:09:57,760 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：课表查询工具初始化成功
+2026-04-24 18:09:57,760 - Backend.services.exam_service - INFO - ✅ 考试服务初始化成功
+2026-04-24 18:09:57,761 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：考试安排工具初始化成功
+2026-04-24 18:09:57,761 - Backend.services.course_selection_service - INFO - ✅ 选课服务初始化成功
+2026-04-24 18:09:57,761 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：选课工具初始化成功
+2026-04-24 18:09:57,762 - Backend.services.activity_service - INFO - ✅ 校园活动服务初始化成功
+2026-04-24 18:09:57,762 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：校园活动工具初始化成功
+2026-04-24 18:09:57,763 - Backend.services.club_service - INFO - ✅ 社团服务初始化成功
+2026-04-24 18:09:57,763 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：社团管理工具初始化成功
+2026-04-24 18:09:57,763 - Backend.services.lost_and_found_service - INFO - ✅ 失物招领服务初始化成功
+2026-04-24 18:09:57,763 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：失物招领工具初始化成功
+2026-04-24 18:09:57,764 - Backend.services.life_service - INFO - ✅ 生活服务初始化成功
+2026-04-24 18:09:57,764 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：生活服务工具初始化成功
+2026-04-24 18:09:57,765 - Backend.services.security_service - INFO - ✅ 安全服务初始化成功
+2026-04-24 18:09:57,765 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：校园安全工具初始化成功
+2026-04-24 18:09:57,766 - Backend.services.mental_health_service - INFO - ✅ 心理健康服务初始化成功
+2026-04-24 18:09:57,766 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：心理健康工具初始化成功
+2026-04-24 18:09:57,766 - Backend.services.dispute_service - INFO - ✅ 纠纷调解服务初始化成功
+2026-04-24 18:09:57,766 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：纠纷调解工具初始化成功
+2026-04-24 18:09:57,767 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：图书馆座位预约工具初始化成功
+2026-04-24 18:09:57,767 - Backend.services.classroom_service - INFO - ✅ 教室预约服务初始化成功
+2026-04-24 18:09:57,767 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：教室预约工具初始化成功
+2026-04-24 18:09:57,768 - Backend.services.venue_service - INFO - ✅ 场馆预约服务初始化成功
+2026-04-24 18:09:57,768 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：场馆预约工具初始化成功
+2026-04-24 18:09:57,768 - Backend.services.lab_service - INFO - ✅ 实验室/设备预约服务初始化成功
+2026-04-24 18:09:57,769 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：实验室设备工具初始化成功
+2026-04-24 18:09:57,769 - Backend.rag.RAG_primary - INFO - ✅ 语言模型和智能体初始化成功
+2026-04-24 18:09:57,769 - Backend.rag.RAG_primary - INFO - ✅ RAG引擎初始化成功（使用三省六部多智能体架构）
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - RAG 引擎初始化成功
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - 宝贝鱼助手后端服务（FastAPI）启动完成
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - 关系数据库 : DATABASE_URI
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - 检索存储   : Chroma 向量库 + SQLite 知识图谱 (STORAGE_MODE=chroma)
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - 图谱文件   : Data/knowledge_graph.sqlite3
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - 服务地址   : http://127.0.0.1:5000
+2026-04-24 18:09:57,769 - Backend.app.main - INFO - 前端地址   : http://127.0.0.1:5000 （由 FastAPI 直接托管）
+2026-04-24 18:18:50,735 - Backend.app.main - INFO - React 构建产物已挂载: E:\Campus-Qa-System\Frontend\ui\dist
+2026-04-24 18:18:51,398 - Backend.app.main - INFO - 数据库表初始化成功
+2026-04-24 18:18:51,400 - Backend.infrastructure.db - WARNING - SQL Server 结构补丁失败，请手动执行 Backend/infrastructure/sql/mssql_notice_scope.sql：(pyodbc.ProgrammingError) ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]索引'ix_email_verification_codes_purpose' 依赖于 列'purpose'。 (5074) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]由于一个或多个对象访问此 列，ALTER TABLE ALTER COLUMN purpose 失败。 (4922)")
+[SQL: 
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'class_name') IS NULL
+        ALTER TABLE dbo.users ADD class_name NVARCHAR(120) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_colleges') IS NULL
+        ALTER TABLE dbo.notices ADD scope_colleges NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_classes') IS NULL
+        ALTER TABLE dbo.notices ADD scope_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'teaching_classes') IS NULL
+        ALTER TABLE dbo.users ADD teaching_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.library_seat_bookings', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.library_seat_bookings (
+            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            user_id INT NOT NULL,
+            seat_code NVARCHAR(64) NOT NULL,
+            zone_name NVARCHAR(120) NOT NULL,
+            slot_label NVARCHAR(80) NOT NULL,
+            slot_start DATETIME2 NOT NULL,
+            slot_end DATETIME2 NOT NULL,
+            booking_date NVARCHAR(16) NOT NULL,
+            status NVARCHAR(32) NOT NULL CONSTRAINT DF_library_seat_bookings_status DEFAULT N'confirmed',
+            created_at DATETIME2 NOT NULL CONSTRAINT DF_library_seat_bookings_created DEFAULT SYSUTCDATETIME(),
+            cancelled_at DATETIME2 NULL
+        );
+        CREATE INDEX IX_library_seat_bookings_user_id ON dbo.library_seat_bookings(user_id);
+        CREATE INDEX IX_library_seat_bookings_date_status ON dbo.library_seat_bookings(booking_date, status);
+    END
+
+    IF OBJECT_ID('dbo.anonymous_word_stats_by_class', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.anonymous_word_stats_by_class (
+            day DATE NOT NULL,
+            class_key NVARCHAR(255) NOT NULL CONSTRAINT DF_anon_word_class DEFAULT N'unknown',
+            dimension NVARCHAR(32) NOT NULL,
+            keyword NVARCHAR(255) NOT NULL,
+            hit_count INT NOT NULL CONSTRAINT DF_anon_word_hit DEFAULT 0,
+            updated_at DATETIME2 NOT NULL CONSTRAINT DF_anon_word_updated DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT PK_anonymous_word_stats_by_class PRIMARY KEY (day, class_key, dimension, keyword)
+        );
+        CREATE INDEX IX_anon_word_day ON dbo.anonymous_word_stats_by_class(day);
+        CREATE INDEX IX_anon_word_class ON dbo.anonymous_word_stats_by_class(class_key);
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = N'dbo'
+          AND TABLE_NAME = N'email_verification_codes'
+          AND COLUMN_NAME = N'purpose'
+          AND CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          AND CHARACTER_MAXIMUM_LENGTH < 48
+    )
+        ALTER TABLE dbo.email_verification_codes ALTER COLUMN purpose NVARCHAR(48) NOT NULL;
+    ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-24 18:18:51,405 - Backend.infrastructure.db - INFO - 校园图谱表已就绪（storage=mysql_graph）
+2026-04-24 18:18:51,550 - Backend.app.main - INFO - 全局向量存储实例初始化成功
+2026-04-24 18:18:51,561 - Backend.app.main - INFO - 初始化时检测到文档数量: 0
+2026-04-24 18:18:52,139 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省智能体初始化成功
+2026-04-24 18:18:52,142 - Backend.rag.agents.wenyuan_ge_agent - INFO - 📚 文渊阁：初始化完成，开始管理个人私有知识库
+2026-04-24 18:18:52,142 - Backend.rag.RAG_primary - INFO - ✅ 使用外部传入的向量存储实例
+2026-04-24 18:18:52,142 - Backend.rag.RAG_primary - INFO - ✅ 向量存储初始化成功
+2026-04-24 18:18:52,143 - Backend.rag.RAG_primary - INFO - 🌐 嵌入模型远程下载通道: https://hf-mirror.com
+2026-04-24 18:18:52,143 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-small-zh-v1.5
+2026-04-24 18:19:30,272 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-04-24 18:19:30,272 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功（远程模型），使用模型: BAAI/bge-small-zh-v1.5
+2026-04-24 18:19:30,272 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功
+2026-04-24 18:19:30,273 - Backend.rag.RAG_primary - INFO - 正在初始化 LLM（混元）: hunyuan-2.0-instruct-20251111
+2026-04-24 18:19:30,273 - Backend.rag.RAG_primary - INFO - API 基础地址: https://tokenhub.tencentmaas.com/v1
+2026-04-24 18:19:30,633 - Backend.rag.RAG_primary - INFO - ✅ LLM 初始化成功（hunyuan-2.0-instruct-20251111），HTTP 超时: 360 秒，max_tokens: 1024，max_retries: 1
+2026-04-24 18:19:30,638 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：认证工具初始化成功
+2026-04-24 18:19:30,638 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：权限管理工具初始化成功
+2026-04-24 18:19:30,638 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：用户信息管理工具初始化成功
+2026-04-24 18:19:30,639 - Backend.services.tuition_service - INFO - ✅ 学费服务初始化成功
+2026-04-24 18:19:30,639 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：学费缴费工具初始化成功
+2026-04-24 18:19:30,640 - Backend.services.scholarship_service - INFO - ✅ 奖助学金服务初始化成功
+2026-04-24 18:19:30,640 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：奖助学金工具初始化成功
+2026-04-24 18:19:30,640 - Backend.services.financial_query_service - INFO - ✅ 财务查询服务初始化成功
+2026-04-24 18:19:30,640 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：财务查询工具初始化成功
+2026-04-24 18:19:30,641 - Backend.services.campus_card_service - INFO - ✅ 校园一卡通服务初始化成功
+2026-04-24 18:19:30,641 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：校园一卡通工具初始化成功
+2026-04-24 18:19:30,642 - Backend.services.maintenance_service - INFO - ✅ 后勤服务初始化成功
+2026-04-24 18:19:30,642 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：后勤服务工具初始化成功
+2026-04-24 18:19:30,642 - Backend.services.grade_service - INFO - ✅ 成绩服务初始化成功
+2026-04-24 18:19:30,643 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：成绩查询工具初始化成功
+2026-04-24 18:19:30,643 - Backend.services.schedule_service - INFO - ✅ 课表服务初始化成功
+2026-04-24 18:19:30,643 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：课表查询工具初始化成功
+2026-04-24 18:19:30,644 - Backend.services.exam_service - INFO - ✅ 考试服务初始化成功
+2026-04-24 18:19:30,644 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：考试安排工具初始化成功
+2026-04-24 18:19:30,645 - Backend.services.course_selection_service - INFO - ✅ 选课服务初始化成功
+2026-04-24 18:19:30,645 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：选课工具初始化成功
+2026-04-24 18:19:30,646 - Backend.services.activity_service - INFO - ✅ 校园活动服务初始化成功
+2026-04-24 18:19:30,646 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：校园活动工具初始化成功
+2026-04-24 18:19:30,646 - Backend.services.club_service - INFO - ✅ 社团服务初始化成功
+2026-04-24 18:19:30,647 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：社团管理工具初始化成功
+2026-04-24 18:19:30,647 - Backend.services.lost_and_found_service - INFO - ✅ 失物招领服务初始化成功
+2026-04-24 18:19:30,647 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：失物招领工具初始化成功
+2026-04-24 18:19:30,648 - Backend.services.life_service - INFO - ✅ 生活服务初始化成功
+2026-04-24 18:19:30,648 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：生活服务工具初始化成功
+2026-04-24 18:19:30,648 - Backend.services.security_service - INFO - ✅ 安全服务初始化成功
+2026-04-24 18:19:30,648 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：校园安全工具初始化成功
+2026-04-24 18:19:30,649 - Backend.services.mental_health_service - INFO - ✅ 心理健康服务初始化成功
+2026-04-24 18:19:30,649 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：心理健康工具初始化成功
+2026-04-24 18:19:30,650 - Backend.services.dispute_service - INFO - ✅ 纠纷调解服务初始化成功
+2026-04-24 18:19:30,650 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：纠纷调解工具初始化成功
+2026-04-24 18:19:30,650 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：图书馆座位预约工具初始化成功
+2026-04-24 18:19:30,650 - Backend.services.classroom_service - INFO - ✅ 教室预约服务初始化成功
+2026-04-24 18:19:30,650 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：教室预约工具初始化成功
+2026-04-24 18:19:30,651 - Backend.services.venue_service - INFO - ✅ 场馆预约服务初始化成功
+2026-04-24 18:19:30,651 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：场馆预约工具初始化成功
+2026-04-24 18:19:30,651 - Backend.services.lab_service - INFO - ✅ 实验室/设备预约服务初始化成功
+2026-04-24 18:19:30,652 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：实验室设备工具初始化成功
+2026-04-24 18:19:30,652 - Backend.rag.RAG_primary - INFO - ✅ 语言模型和智能体初始化成功
+2026-04-24 18:19:30,652 - Backend.rag.RAG_primary - INFO - ✅ RAG引擎初始化成功（使用三省六部多智能体架构）
+2026-04-24 18:19:30,652 - Backend.app.main - INFO - RAG 引擎初始化成功
+2026-04-24 18:19:30,652 - Backend.app.main - INFO - 宝贝鱼助手后端服务（FastAPI）启动完成
+2026-04-24 18:19:30,652 - Backend.app.main - INFO - 关系数据库 : DATABASE_URI
+2026-04-24 18:19:30,652 - Backend.app.main - INFO - 检索存储   : Chroma 向量库 + SQLite 知识图谱 (STORAGE_MODE=chroma)
+2026-04-24 18:19:30,652 - Backend.app.main - INFO - 图谱文件   : Data/knowledge_graph.sqlite3
+2026-04-24 18:19:30,652 - Backend.app.main - INFO - 服务地址   : http://127.0.0.1:5000
+2026-04-24 18:19:30,653 - Backend.app.main - INFO - 前端地址   : http://127.0.0.1:5000 （由 FastAPI 直接托管）
+2026-04-24 18:19:54,103 - Backend.infrastructure.auth - WARNING - Token已过期
+2026-04-24 18:19:54,104 - Backend.infrastructure.auth - WARNING - Token已过期
+2026-04-24 18:19:54,105 - Backend.infrastructure.auth - WARNING - Token已过期
+2026-04-24 18:19:54,105 - Backend.api.routes.auth - WARNING - Token验证失败，token前50字符: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxM
+2026-04-24 18:20:08,395 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：开始请求预处理与安全校验...
+2026-04-24 18:20:08,396 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：开始预处理用户输入
+2026-04-24 18:20:08,396 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省：输入预处理完成
+2026-04-24 18:20:08,397 - Backend.rag.RAG_primary - INFO - 🏛️ 中书省：开始意图理解与知识增强...
+2026-04-24 18:20:08,397 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行请求标准化
+2026-04-24 18:20:11,299 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:20:11,305 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：LLM意图分析成功
+2026-04-24 18:20:11,306 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：请求标准化完成
+2026-04-24 18:20:11,306 - Backend.rag.RAG_primary - INFO - 📋 中书省：请求标准化完成
+2026-04-24 18:20:11,306 - Backend.rag.RAG_primary - INFO - 📋 中书省：意图分析结果: {'intent': '其他', 'entities': {}, 'domain': '通用', 'scene': '意图理解', 'confidence': 0.5, 'required_info': ''}
+2026-04-24 18:20:11,306 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：混合增强检索完成，上下文长度: 7 字符
+2026-04-24 18:20:11,306 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：执行知识关联推送
+2026-04-24 18:20:11,306 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：知识关联推送完成
+2026-04-24 18:20:11,307 - Backend.rag.RAG_primary - INFO - 📋 中书省：知识关联推送完成
+2026-04-24 18:20:11,307 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - 🔍 中书省：生成任务指令
+2026-04-24 18:20:11,307 - Backend.rag.agents.ministry_of_zhongshu_agent - INFO - ✅ 中书省：任务指令生成成功 - {'target_department': None, 'task_type': 'general', 'intent': '其他', 'domain': '通用', 'scene': '意图理解', 'entities': {}, 'priority': 'normal', 'confidence': 0.5, 'user_input': '图书馆开放时间', 'execution_mode': 'interactive', 'timestamp': '2026-04-24T18:20:11.307209'}
+2026-04-24 18:20:11,307 - Backend.rag.RAG_primary - INFO - 📋 中书省：生成任务指令完成
+2026-04-24 18:20:11,307 - Backend.rag.RAG_primary - INFO - 🏛️ 门下省：执行调度决策...
+2026-04-24 18:20:11,307 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：执行调度决策
+2026-04-24 18:20:11,307 - Backend.rag.agents.ministry_of_rites_agent - INFO - 🔍 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:20:11.307581'}
+2026-04-24 18:20:11,307 - Backend.rag.RAG_primary - INFO - 📋 门下省：调度决策结果: {'user_id': '12', 'intent': '其他', 'entities': {}, 'priority': 'normal', 'routing_strategy': 'default', 'execution_timeout': 8, 'user_preferences': {}, 'timestamp': '2026-04-24T18:20:11.307581'}
+2026-04-24 18:20:11,307 - Backend.rag.RAG_primary - INFO - 🏛️ 尚书省：开始任务调度与结果聚合...
+2026-04-24 18:20:11,308 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：无对应部门，使用通用处理
+2026-04-24 18:20:12,868 - httpx - INFO - HTTP Request: POST https://tokenhub.tencentmaas.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-24 18:20:12,868 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ℹ️ 尚书省：仅通用结果，跳过LLM聚合
+2026-04-24 18:20:12,870 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：开始异步更新数据库
+2026-04-24 18:20:12,870 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - ✅ 尚书省：任务调度与结果聚合完成
+2026-04-24 18:20:12,871 - Backend.rag.agents.validation_agent - INFO - 🔍 御史台：收到答案，开始进行校验...
+2026-04-24 18:20:12,871 - Backend.rag.agents.validation_agent - INFO - ✅ 御史台：已跳过 LLM 校验（RAG_SKIP_LLM_VALIDATION）
+2026-04-24 18:20:12,871 - Backend.rag.RAG_primary - INFO - ℹ️ 已跳过门下省补充校验（RAG_SKIP_MINISTRY_RITES_VALIDATION）
+2026-04-24 18:20:12,878 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：收到任务，开始格式化输出...
+2026-04-24 18:20:12,878 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出完成
+2026-04-24 18:20:12,878 - Backend.rag.agents.output_agent - INFO - 📊 输出Agent：格式化输出成功
+2026-04-24 18:20:12,879 - Backend.rag.RAG_primary - INFO - ✅ 回复生成成功: 【校园服务｜意图理解】
+无法仅凭标题还原全文，建议通过学校官网图书馆栏目或校内公告系统查询具体开放时间安排，也可直接咨询图书馆前台获取最新信息。
+
+📅 回复时间...
+2026-04-24 18:20:13,871 - Backend.rag.agents.ministry_of_shangshu_agent - INFO - 💾 尚书省：数据库更新完成，数据: {'user_id': '12', 'user_input': '图书馆开放时间', 'final_answer': '无法仅凭标题还原全文，建议通过学校官网图书馆栏目或校内公告系统查询具体开放时间安排，也可直接咨询图书馆前台获取最新信息。', 'intent': '其他', 'timestamp': '2026-04-24T18:20:13.871262', 'status': 'completed'}
+2026-04-24 18:25:12,864 - Backend.app.main - INFO - React 构建产物已挂载: E:\Campus-Qa-System\Frontend\ui\dist
+2026-04-24 18:25:13,540 - Backend.app.main - INFO - 数据库表初始化成功
+2026-04-24 18:25:13,543 - Backend.infrastructure.db - WARNING - SQL Server 结构补丁失败，请手动执行 Backend/infrastructure/sql/mssql_notice_scope.sql：(pyodbc.ProgrammingError) ('42000', "[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]索引'ix_email_verification_codes_purpose' 依赖于 列'purpose'。 (5074) (SQLExecDirectW); [42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]由于一个或多个对象访问此 列，ALTER TABLE ALTER COLUMN purpose 失败。 (4922)")
+[SQL: 
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'class_name') IS NULL
+        ALTER TABLE dbo.users ADD class_name NVARCHAR(120) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_colleges') IS NULL
+        ALTER TABLE dbo.notices ADD scope_colleges NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.notices', 'U') IS NOT NULL AND COL_LENGTH('dbo.notices', 'scope_classes') IS NULL
+        ALTER TABLE dbo.notices ADD scope_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.users', 'U') IS NOT NULL AND COL_LENGTH('dbo.users', 'teaching_classes') IS NULL
+        ALTER TABLE dbo.users ADD teaching_classes NVARCHAR(MAX) NULL;
+
+    IF OBJECT_ID('dbo.library_seat_bookings', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.library_seat_bookings (
+            id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+            user_id INT NOT NULL,
+            seat_code NVARCHAR(64) NOT NULL,
+            zone_name NVARCHAR(120) NOT NULL,
+            slot_label NVARCHAR(80) NOT NULL,
+            slot_start DATETIME2 NOT NULL,
+            slot_end DATETIME2 NOT NULL,
+            booking_date NVARCHAR(16) NOT NULL,
+            status NVARCHAR(32) NOT NULL CONSTRAINT DF_library_seat_bookings_status DEFAULT N'confirmed',
+            created_at DATETIME2 NOT NULL CONSTRAINT DF_library_seat_bookings_created DEFAULT SYSUTCDATETIME(),
+            cancelled_at DATETIME2 NULL
+        );
+        CREATE INDEX IX_library_seat_bookings_user_id ON dbo.library_seat_bookings(user_id);
+        CREATE INDEX IX_library_seat_bookings_date_status ON dbo.library_seat_bookings(booking_date, status);
+    END
+
+    IF OBJECT_ID('dbo.anonymous_word_stats_by_class', 'U') IS NULL
+    BEGIN
+        CREATE TABLE dbo.anonymous_word_stats_by_class (
+            day DATE NOT NULL,
+            class_key NVARCHAR(255) NOT NULL CONSTRAINT DF_anon_word_class DEFAULT N'unknown',
+            dimension NVARCHAR(32) NOT NULL,
+            keyword NVARCHAR(255) NOT NULL,
+            hit_count INT NOT NULL CONSTRAINT DF_anon_word_hit DEFAULT 0,
+            updated_at DATETIME2 NOT NULL CONSTRAINT DF_anon_word_updated DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT PK_anonymous_word_stats_by_class PRIMARY KEY (day, class_key, dimension, keyword)
+        );
+        CREATE INDEX IX_anon_word_day ON dbo.anonymous_word_stats_by_class(day);
+        CREATE INDEX IX_anon_word_class ON dbo.anonymous_word_stats_by_class(class_key);
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = N'dbo'
+          AND TABLE_NAME = N'email_verification_codes'
+          AND COLUMN_NAME = N'purpose'
+          AND CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          AND CHARACTER_MAXIMUM_LENGTH < 48
+    )
+        ALTER TABLE dbo.email_verification_codes ALTER COLUMN purpose NVARCHAR(48) NOT NULL;
+    ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-24 18:25:13,556 - Backend.infrastructure.db - INFO - 校园图谱表已就绪（storage=mysql_graph）
+2026-04-24 18:25:13,687 - Backend.app.main - INFO - 全局向量存储实例初始化成功
+2026-04-24 18:25:13,697 - Backend.app.main - INFO - 初始化时检测到文档数量: 0
+2026-04-24 18:25:14,282 - Backend.rag.agents.ministry_of_rites_agent - INFO - ✅ 门下省智能体初始化成功
+2026-04-24 18:25:14,284 - Backend.rag.agents.wenyuan_ge_agent - INFO - 📚 文渊阁：初始化完成，开始管理个人私有知识库
+2026-04-24 18:25:14,284 - Backend.rag.RAG_primary - INFO - ✅ 使用外部传入的向量存储实例
+2026-04-24 18:25:14,285 - Backend.rag.RAG_primary - INFO - ✅ 向量存储初始化成功
+2026-04-24 18:25:14,285 - Backend.rag.RAG_primary - INFO - 🌐 嵌入模型远程下载通道: https://hf-mirror.com
+2026-04-24 18:25:14,285 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: BAAI/bge-small-zh-v1.5
+2026-04-24 18:25:21,181 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2026-04-24 18:25:21,181 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功（远程模型），使用模型: BAAI/bge-small-zh-v1.5
+2026-04-24 18:25:21,182 - Backend.rag.RAG_primary - INFO - ✅ 嵌入模型初始化成功
+2026-04-24 18:25:21,182 - Backend.rag.RAG_primary - INFO - 正在初始化 LLM（混元）: hunyuan-2.0-instruct-20251111
+2026-04-24 18:25:21,182 - Backend.rag.RAG_primary - INFO - API 基础地址: https://tokenhub.tencentmaas.com/v1
+2026-04-24 18:25:21,554 - Backend.rag.RAG_primary - INFO - ✅ LLM 初始化成功（hunyuan-2.0-instruct-20251111），HTTP 超时: 360 秒，max_tokens: 1024，max_retries: 1
+2026-04-24 18:25:21,560 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：认证工具初始化成功
+2026-04-24 18:25:21,560 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：权限管理工具初始化成功
+2026-04-24 18:25:21,560 - Backend.rag.agents.departments.li_bu_agent - INFO - ✅ 吏部：用户信息管理工具初始化成功
+2026-04-24 18:25:21,561 - Backend.services.tuition_service - INFO - ✅ 学费服务初始化成功
+2026-04-24 18:25:21,561 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：学费缴费工具初始化成功
+2026-04-24 18:25:21,561 - Backend.services.scholarship_service - INFO - ✅ 奖助学金服务初始化成功
+2026-04-24 18:25:21,561 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：奖助学金工具初始化成功
+2026-04-24 18:25:21,562 - Backend.services.financial_query_service - INFO - ✅ 财务查询服务初始化成功
+2026-04-24 18:25:21,562 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：财务查询工具初始化成功
+2026-04-24 18:25:21,563 - Backend.services.campus_card_service - INFO - ✅ 校园一卡通服务初始化成功
+2026-04-24 18:25:21,563 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：校园一卡通工具初始化成功
+2026-04-24 18:25:21,563 - Backend.services.maintenance_service - INFO - ✅ 后勤服务初始化成功
+2026-04-24 18:25:21,564 - Backend.rag.agents.departments.hu_bu_agent - INFO - ✅ 户部：后勤服务工具初始化成功
+2026-04-24 18:25:21,564 - Backend.services.grade_service - INFO - ✅ 成绩服务初始化成功
+2026-04-24 18:25:21,564 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：成绩查询工具初始化成功
+2026-04-24 18:25:21,565 - Backend.services.schedule_service - INFO - ✅ 课表服务初始化成功
+2026-04-24 18:25:21,566 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：课表查询工具初始化成功
+2026-04-24 18:25:21,566 - Backend.services.exam_service - INFO - ✅ 考试服务初始化成功
+2026-04-24 18:25:21,566 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：考试安排工具初始化成功
+2026-04-24 18:25:21,567 - Backend.services.course_selection_service - INFO - ✅ 选课服务初始化成功
+2026-04-24 18:25:21,567 - Backend.rag.agents.departments.li_bu_agent2 - INFO - ✅ 礼部：选课工具初始化成功
+2026-04-24 18:25:21,567 - Backend.services.activity_service - INFO - ✅ 校园活动服务初始化成功
+2026-04-24 18:25:21,568 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：校园活动工具初始化成功
+2026-04-24 18:25:21,568 - Backend.services.club_service - INFO - ✅ 社团服务初始化成功
+2026-04-24 18:25:21,568 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：社团管理工具初始化成功
+2026-04-24 18:25:21,569 - Backend.services.lost_and_found_service - INFO - ✅ 失物招领服务初始化成功
+2026-04-24 18:25:21,569 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：失物招领工具初始化成功
+2026-04-24 18:25:21,570 - Backend.services.life_service - INFO - ✅ 生活服务初始化成功
+2026-04-24 18:25:21,570 - Backend.rag.agents.departments.bing_bu_agent - INFO - ✅ 兵部：生活服务工具初始化成功
+2026-04-24 18:25:21,570 - Backend.services.security_service - INFO - ✅ 安全服务初始化成功
+2026-04-24 18:25:21,570 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：校园安全工具初始化成功
+2026-04-24 18:25:21,571 - Backend.services.mental_health_service - INFO - ✅ 心理健康服务初始化成功
+2026-04-24 18:25:21,571 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：心理健康工具初始化成功
+2026-04-24 18:25:21,571 - Backend.services.dispute_service - INFO - ✅ 纠纷调解服务初始化成功
+2026-04-24 18:25:21,572 - Backend.rag.agents.departments.xing_bu_agent - INFO - ✅ 刑部：纠纷调解工具初始化成功
+2026-04-24 18:25:21,572 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：图书馆座位预约工具初始化成功
+2026-04-24 18:25:21,572 - Backend.services.classroom_service - INFO - ✅ 教室预约服务初始化成功
+2026-04-24 18:25:21,573 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：教室预约工具初始化成功
+2026-04-24 18:25:21,573 - Backend.services.venue_service - INFO - ✅ 场馆预约服务初始化成功
+2026-04-24 18:25:21,573 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：场馆预约工具初始化成功
+2026-04-24 18:25:21,574 - Backend.services.lab_service - INFO - ✅ 实验室/设备预约服务初始化成功
+2026-04-24 18:25:21,574 - Backend.rag.agents.departments.gong_bu_agent - INFO - ✅ 工部：实验室设备工具初始化成功
+2026-04-24 18:25:21,574 - Backend.rag.RAG_primary - INFO - ✅ 语言模型和智能体初始化成功
+2026-04-24 18:25:21,574 - Backend.rag.RAG_primary - INFO - ✅ RAG引擎初始化成功（使用三省六部多智能体架构）
+2026-04-24 18:25:21,574 - Backend.app.main - INFO - RAG 引擎初始化成功
+2026-04-24 18:25:21,574 - Backend.app.main - INFO - 宝贝鱼助手后端服务（FastAPI）启动完成
+2026-04-24 18:25:21,575 - Backend.app.main - INFO - 关系数据库 : DATABASE_URI
+2026-04-24 18:25:21,575 - Backend.app.main - INFO - 检索存储   : Chroma 向量库 + SQLite 知识图谱 (STORAGE_MODE=chroma)
+2026-04-24 18:25:21,575 - Backend.app.main - INFO - 图谱文件   : Data/knowledge_graph.sqlite3
+2026-04-24 18:25:21,575 - Backend.app.main - INFO - 服务地址   : http://127.0.0.1:5000
+2026-04-24 18:25:21,575 - Backend.app.main - INFO - 前端地址   : http://127.0.0.1:5000 （由 FastAPI 直接托管）
